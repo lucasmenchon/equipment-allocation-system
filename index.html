@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Link para o arquivo CSS do Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+    <title>Colégio Vencer Sempre</title>
+    <style>
+        /* Estilos customizados para o cabeçalho */
+        header {
+            background-color: #21568C;
+            color: #FFF;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 36px;
+            margin-top: 0;
+            margin-bottom: 0;
+        }
+
+        p {
+            font-size: 18px;
+            margin-top: 5px;
+            margin-bottom: 0;
+        }
+
+        /* Estilos customizados para as colunas */
+        .allocation-column {
+            background-color: #F8F9FA;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .allocation-column h2 {
+            font-size: 24px;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+
+        .allocation-column button {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+    <div id="appAllocationSystem">
+        <!-- Cabeçalho -->
+        <header class="mb-1">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h1>{{ schoolName }}</h1>
+                        <p>O seu caminho para o sucesso começa aqui</p>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <!-- <img src="logo.png" alt="Logo do Colégio Vencer Sempre"> -->
+                    </div>
+                </div>
+            </div>
+        </header>
+        <!-- Conteúdo da página -->
+        <main>
+            <div class="container">
+                <!-- Botão para abrir o formulário modal de adição de equipamento -->
+                <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal"
+                    data-bs-target="#addEquipmentModal">
+                    Adicionar equipamento
+                </button>
+
+
+                <div class="row">
+
+                    <!-- Lista de equipamentos disponíveis -->
+                    <div class="col-md-6 allocation-column">
+                        <h2>Equipamentos Disponíveis</h2>
+                        <ul class="list-group">
+                            <li class="list-group-item" v-for="equipment in equipmentList">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="fw-bold">{{ equipment.name }}</span>
+                                    <span class="badge bg-primary rounded-pill">Nº {{ equipment.id }}</span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Coluna de equipamentos ocupados -->
+                    <div class="col-md-6 allocation-column">
+                        <h2>Equipamentos Ocupados</h2>
+                        <ul class="list-group">
+                            <li class="list-group-item" v-for="equipment in allocatedEquipmentList"
+                                v-if="equipment.allocatedTo">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="fw-bold">{{ equipment.name }}</span>
+                                    <span class="badge bg-secondary rounded-pill">{{ equipment.allocatedTo.name
+                                        }}</span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h3 class="card-title">Alocar Equipamento</h3>
+                                <form @submit.prevent="allocateEquipment">
+                                    <div class="mb-3">
+                                        <label for="collaboratorId" class="form-label">ID do colaborador:</label>
+                                        <input type="number" class="form-control" id="collaboratorId"
+                                            v-model="collaboratorId">
+                                        <span v-if="collaboratorName">{{ collaboratorName }}</span>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="equipmentId" class="form-label">ID do equipamento:</label>
+                                        <input type="number" class="form-control" id="equipmentId"
+                                            v-model="equipmentId">
+                                        <span v-if="equipmentName">{{ equipmentName }}</span>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Alocar equipamento</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Formulário modal de adição de equipamento -->
+                <div class="modal fade" id="addEquipmentModal" tabindex="-1" aria-labelledby="addEquipmentModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <form @submit.prevent="addEquipment">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="addEquipmentModalLabel">Adicionar equipamento</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Fechar"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <label for="equipmentName" class="form-label">Nome do equipamento:</label>
+                                        <input type="text" class="form-control" id="equipmentName"
+                                            v-model="equipment.name">
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary"
+                                        data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="submit" class="btn btn-primary">Adicionar</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN"
+        crossorigin="anonymous"></script>
+    <!-- Vue.js framework -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <!-- App Vue -->
+    <script>
+        const { createApp } = Vue
+        createApp({
+            data() {
+                return {
+                    schoolName: 'Colégio Vencer Sempre',
+                    equipment: {
+                        id: 1,
+                        status: '',
+                        name: '',
+                        allocatedTo: {},
+                    },
+                    equipmentId: null,
+                    equipmentName: '',
+                    collaboratorId: null,
+                    collaboratorName: '',
+                    equipmentList: [],
+                    collaborator: {
+                        id: 1,
+                        name: '',
+                        office: '',
+                        equipmentsAllocated: [],
+                    },
+                    collaboratorList: [],
+                    allocatedEquipmentList: [],
+                    waitingList: [],
+                    showError: false,
+                }
+            },
+            watch: {
+                collaboratorId: function (newValue, oldValue) {
+                    const collaborator = this.collaboratorList.find(c => c.id === newValue);
+                    if (collaborator) {
+                        this.collaboratorName = collaborator.name;
+                    } else {
+                        this.collaboratorName = "Não foi encontrado colaborador com este código.";
+                    }
+                },
+                equipmentId: function (newValue, oldValue) {
+                    const equipment = this.equipmentList.find(e => e.id === newValue);
+                    if (equipment) {
+                        this.equipmentName = equipment.name;
+                    } else {
+                        this.equipmentName = "Nenhum equipamento com este código.";
+                    }
+                }
+            },
+            methods: {
+                addCollaborator(collaborator) {
+                    this.collaboratorList.push({
+                        id: this.collaboratorList.length++,
+                        name: name,
+                        type: type,
+                    })
+                },
+
+                addEquipment(equipment) {
+                    this.equipmentList.push({
+                        id: this.equipment.id++,
+                        name: this.equipment.name,
+                    })
+                },
+
+                allocateEquipment(collaboratorId, equipmentId) {
+                    // encontrar o colaborador e o equipamento na lista pelo id
+                    const collaborator = this.collaboratorList.find(c => c.id === collaboratorId);
+                    const equipment = this.equipmentList.find(e => e.id === equipmentId);
+
+                    // atualizar o atributo allocatedTo do equipamento com o id do colaborador
+                    equipment.allocatedTo = collaborator;
+
+                    // adicionar o equipamento à lista de equipamentos alocados do colaborador
+                    collaborator.equipmentsAllocated.push(equipment);
+
+                    // adicionar o equipamento à lista de equipamentos alocados geral
+                    this.allocatedEquipmentList.push(equipment);
+                },
+
+                deallocateEquipment(equipment) {
+                    equipment.status = 'available'
+                    equipment.user = null
+                    this.allocatedEquipmentList = this.allocatedEquipmentList.filter(e => e.id !== equipment.id)
+                },
+
+                reserveEquipment(collaborator) {
+                    const availableEquipment = this.equipmentList.find(e => e.status === 'available')
+                    if (availableEquipment) {
+                        availableEquipment.status = 'reserved'
+                        this.waitingList.push(collaborator)
+                    } else {
+                        alert('No available equipment')
+                    }
+                }
+
+            }
+        }).mount('#appAllocationSystem')
+    </script>
+</body>
+
+</html>
