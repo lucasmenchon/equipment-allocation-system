@@ -110,7 +110,7 @@
                         <div class="card">
                             <div class="card-body">
                                 <h3 class="card-title">Alocar Equipamento</h3>
-                                <form @submit.prevent="allocateEquipment">
+                                <form @submit.prevent="allocateEquipment(collaboratorId, equipmentId)">
                                     <div class="mb-3">
                                         <label for="collaboratorId" class="form-label">ID do colaborador:</label>
                                         <input type="number" class="form-control" id="collaboratorId"
@@ -126,6 +126,69 @@
                                     <button type="submit" class="btn btn-primary">Alocar equipamento</button>
                                 </form>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 mt-1">
+                    <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal"
+                        data-bs-target="#addCollaboratorModal">
+                        Adicionar colaborador
+                    </button>
+                </div>
+
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Cargo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="collaborator in collaboratorList" :key="collaborator.id">
+                            <td>{{ collaborator.id }}</td>
+                            <td>{{ collaborator.name }}</td>
+                            <td>{{ collaborator.office }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+
+                <!-- Formulário modal de adição de colaborador -->
+                <div class="modal fade" id="addCollaboratorModal" tabindex="-1"
+                    aria-labelledby="addCollaboratorModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <form @submit.prevent="addCollaborator(collaborator)">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="addCollaboratorModalLabel">Adicionar colaborador</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Fechar"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <label for="collaboratorName" class="form-label">Nome do colaborador:</label>
+                                        <input type="text" class="form-control" id="collaboratorName"
+                                            v-model="collaborator.name">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="collaboratorOffice" class="form-label">Cargo:</label>
+                                        <select class="form-select" id="collaboratorOffice"
+                                            v-model="collaborator.office">
+                                            <option value="Desenvolvedor">Desenvolvedor</option>
+                                            <option value="Designer">Designer</option>
+                                            <option value="Gerente de projeto">Gerente de projeto</option>
+                                            <option value="Outro">Outro</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary"
+                                        data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="submit" class="btn btn-primary">Adicionar</button>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -165,7 +228,7 @@
         integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN"
         crossorigin="anonymous"></script>
     <!-- Vue.js framework -->
-    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <!-- App Vue -->
     <script>
         const { createApp } = Vue
@@ -217,9 +280,10 @@
             methods: {
                 addCollaborator(collaborator) {
                     this.collaboratorList.push({
-                        id: this.collaboratorList.length++,
-                        name: name,
-                        type: type,
+                        id: this.collaborator.id++,
+                        name: this.collaborator.name,
+                        office: this.collaborator.office,
+                        equipmentsAllocated: [],
                     })
                 },
 
