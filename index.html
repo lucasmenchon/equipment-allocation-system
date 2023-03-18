@@ -274,7 +274,6 @@
                         allocated: false,
                         checked: false,
                     },
-                    equipmentId: null,
                     equipmentName: '',
                     collaboratorId: null,
                     collaboratorName: '',
@@ -304,17 +303,9 @@
                     if (collaborator) {
                         this.collaboratorName = collaborator.name
                     } else {
-                        this.collaboratorName = "Não foi encontrado colaborador com este código."
+                        this.collaboratorName = "Não foi encontrado colaborador com este ID."
                     }
                 },
-                equipmentId: function (newValue, oldValue) {
-                    const equipment = this.equipmentList.find(e => e.id === newValue);
-                    if (equipment) {
-                        this.equipmentName = equipment.name;
-                    } else {
-                        this.equipmentName = "Nenhum equipamento com este código."
-                    }
-                }
             },
             methods: {
                 addCollaborator(collaborator) {
@@ -345,7 +336,7 @@
                     // encontrar o colaborador na lista pelo id
                     const collaborator = this.collaboratorList.find(c => c.id === collaboratorId)
 
-                    // atualizar o atributo allocatedTo do equipamento com o id do colaborador
+                    // atualizar as propriedades do equipamento
                     selectedEquipmentList.forEach(equipment => {
                         equipment.allocated = true
                         equipment.checked = false
@@ -375,7 +366,6 @@
                         alert('No available equipment')
                     }
                 }
-
             }
         }).mount('#appAllocationSystem')
     </script>
