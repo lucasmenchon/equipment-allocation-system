@@ -44,6 +44,10 @@
         .allocation-column button {
             margin-top: 10px;
         }
+
+        .form-check-input:checked {
+            background-color: blue;
+        }
     </style>
 </head>
 
@@ -72,22 +76,26 @@
                     Adicionar equipamento
                 </button>
 
-
                 <div class="row">
 
                     <!-- Lista de equipamentos disponíveis -->
                     <div class="col-md-6 allocation-column">
                         <h2>Equipamentos Disponíveis</h2>
                         <ul class="list-group">
-                            <li class="list-group-item" v-for="equipment in equipmentList">
+                            <li class="list-group-item" v-for="equipment in availableEquipmentList">
                                 <div class="d-flex justify-content-between align-items-center">
+
+                                    <input class="form-check-input col-1 checkbox" type="checkbox"
+                                        v-model="equipment.checked" :id="equipment.id"
+                                        @change="updateSelectedEquipmentList(equipment)">
+
                                     <span class="fw-bold">{{ equipment.name }}</span>
-                                    <span class="badge bg-primary rounded-pill">Nº {{ equipment.id }}</span>
+                                    <span class="badge bg-primary rounded-pill">ID: {{ equipment.id }}</span>
                                 </div>
                             </li>
                         </ul>
                     </div>
-
+                    
                     <!-- Coluna de equipamentos ocupados -->
                     <div class="col-md-6 allocation-column">
                         <h2>Equipamentos Ocupados</h2>
@@ -96,39 +104,18 @@
                                 v-if="equipment.allocatedTo">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <span class="fw-bold">{{ equipment.name }}</span>
-                                    <span class="badge bg-secondary rounded-pill">{{ equipment.allocatedTo.name
-                                        }}</span>
+                                    <span class="badge bg-secondary rounded-pill">{{equipment.allocatedTo.office}}
+                                        - {{ equipment.allocatedTo.name}}</span>
                                 </div>
                             </li>
                         </ul>
                     </div>
-
                 </div>
 
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="card">
-                            <div class="card-body">
-                                <h3 class="card-title">Alocar Equipamento</h3>
-                                <form @submit.prevent="allocateEquipment(collaboratorId, equipmentId)">
-                                    <div class="mb-3">
-                                        <label for="collaboratorId" class="form-label">ID do colaborador:</label>
-                                        <input type="number" class="form-control" id="collaboratorId"
-                                            v-model="collaboratorId">
-                                        <span v-if="collaboratorName">{{ collaboratorName }}</span>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="equipmentId" class="form-label">ID do equipamento:</label>
-                                        <input type="number" class="form-control" id="equipmentId"
-                                            v-model="equipmentId">
-                                        <span v-if="equipmentName">{{ equipmentName }}</span>
-                                    </div>
-                                    <button type="submit" class="btn btn-primary">Alocar equipamento</button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                            data-bs-target="#allocateEquipmentModal">
+                            Alocar Equipamento
+                        </button>
 
                 <div class="col-md-6 mt-1">
                     <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal"
@@ -155,7 +142,7 @@
                 </table>
 
 
-                <!-- Formulário modal de adição de colaborador -->
+                <!-- Modal de adição de colaborador -->
                 <div class="modal fade" id="addCollaboratorModal" tabindex="-1"
                     aria-labelledby="addCollaboratorModalLabel" aria-hidden="true">
                     <div class="modal-dialog">
@@ -176,9 +163,8 @@
                                         <label for="collaboratorOffice" class="form-label">Cargo:</label>
                                         <select class="form-select" id="collaboratorOffice"
                                             v-model="collaborator.office">
-                                            <option value="Desenvolvedor">Desenvolvedor</option>
-                                            <option value="Designer">Designer</option>
-                                            <option value="Gerente de projeto">Gerente de projeto</option>
+                                            <option value="Professor">Professor</option>
+                                            <option value="Coordenador">Coordenador</option>
                                             <option value="Outro">Outro</option>
                                         </select>
                                     </div>
@@ -193,7 +179,7 @@
                     </div>
                 </div>
 
-                <!-- Formulário modal de adição de equipamento -->
+                <!-- Modal de adição de equipamento -->
                 <div class="modal fade" id="addEquipmentModal" tabindex="-1" aria-labelledby="addEquipmentModalLabel"
                     aria-hidden="true">
                     <div class="modal-dialog">
@@ -221,6 +207,50 @@
                     </div>
                 </div>
 
+                <!-- Modal para alocar o equipamento -->
+                <form @submit.prevent="allocateEquipment(collaboratorId, selectedEquipmentList)">
+                    <div class="modal fade" id="allocateEquipmentModal" tabindex="-1"
+                        aria-labelledby="allocateEquipmentModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="allocateEquipmentModalLabel">Selecionar Colaborador</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Fechar"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row mb-3">
+                                        <label for="collaboratorId" class="col-sm-4 col-form-label">ID do
+                                            colaborador:</label>
+                                        <div class="col-sm-8">
+                                            <input type="number" class="form-control" id="collaboratorId"
+                                                v-model="collaboratorId">
+                                            <span v-if="collaboratorName">{{ collaboratorName }}</span>
+                                        </div>
+                                    </div>
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Equipamentos Selecionados:</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr v-for="equipment in selectedEquipmentList" :key="equipment.id">
+                                                <td>{{ equipment.name }}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary"
+                                        data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="submit" class="btn btn-primary">Alocar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
             </div>
         </main>
     </div>
@@ -241,6 +271,8 @@
                         status: '',
                         name: '',
                         allocatedTo: {},
+                        allocated: false,
+                        checked: false,
                     },
                     equipmentId: null,
                     equipmentName: '',
@@ -255,17 +287,24 @@
                     },
                     collaboratorList: [],
                     allocatedEquipmentList: [],
+                    selectedEquipmentList: [],
                     waitingList: [],
                     showError: false,
+                    formCheckInput: '',
+                }
+            },
+            computed: {
+                availableEquipmentList() {
+                    return this.equipmentList.filter(equipment => !equipment.allocated)
                 }
             },
             watch: {
                 collaboratorId: function (newValue, oldValue) {
-                    const collaborator = this.collaboratorList.find(c => c.id === newValue);
+                    const collaborator = this.collaboratorList.find(c => c.id === newValue)
                     if (collaborator) {
-                        this.collaboratorName = collaborator.name;
+                        this.collaboratorName = collaborator.name
                     } else {
-                        this.collaboratorName = "Não foi encontrado colaborador com este código.";
+                        this.collaboratorName = "Não foi encontrado colaborador com este código."
                     }
                 },
                 equipmentId: function (newValue, oldValue) {
@@ -273,7 +312,7 @@
                     if (equipment) {
                         this.equipmentName = equipment.name;
                     } else {
-                        this.equipmentName = "Nenhum equipamento com este código.";
+                        this.equipmentName = "Nenhum equipamento com este código."
                     }
                 }
             },
@@ -291,22 +330,33 @@
                     this.equipmentList.push({
                         id: this.equipment.id++,
                         name: this.equipment.name,
+                        allocatedTo: {},
+                        allocated: false,
+                        checked: false,
                     })
+                    this.equipment.name = ''
                 },
 
-                allocateEquipment(collaboratorId, equipmentId) {
-                    // encontrar o colaborador e o equipamento na lista pelo id
-                    const collaborator = this.collaboratorList.find(c => c.id === collaboratorId);
-                    const equipment = this.equipmentList.find(e => e.id === equipmentId);
+                updateSelectedEquipmentList(equipment) {
+                    this.selectedEquipmentList = this.equipmentList.filter(equipment => equipment.checked)
+                },
+
+                allocateEquipment(collaboratorId, selectedEquipmentList) {
+                    // encontrar o colaborador na lista pelo id
+                    const collaborator = this.collaboratorList.find(c => c.id === collaboratorId)
 
                     // atualizar o atributo allocatedTo do equipamento com o id do colaborador
-                    equipment.allocatedTo = collaborator;
+                    selectedEquipmentList.forEach(equipment => {
+                        equipment.allocated = true
+                        equipment.checked = false
+                        equipment.allocatedTo = collaborator
+                    });
 
                     // adicionar o equipamento à lista de equipamentos alocados do colaborador
-                    collaborator.equipmentsAllocated.push(equipment);
+                    collaborator.equipmentsAllocated = selectedEquipmentList;
 
                     // adicionar o equipamento à lista de equipamentos alocados geral
-                    this.allocatedEquipmentList.push(equipment);
+                    this.allocatedEquipmentList.push(...selectedEquipmentList)
                 },
 
                 deallocateEquipment(equipment) {
@@ -317,6 +367,7 @@
 
                 reserveEquipment(collaborator) {
                     const availableEquipment = this.equipmentList.find(e => e.status === 'available')
+
                     if (availableEquipment) {
                         availableEquipment.status = 'reserved'
                         this.waitingList.push(collaborator)
